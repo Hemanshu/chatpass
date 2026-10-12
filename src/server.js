@@ -57,7 +57,7 @@ function rateLimiter({ limit, windowMs }) {
 
 export function createApp({
   trustProxy = false,
-  maxTtlSeconds = 24 * 3600,
+  maxTtlSeconds = 300,
   maxReadsLimit = 10,
   createLimit = 30,
   revealLimit = 120,
@@ -118,7 +118,7 @@ export function createApp({
       if (!createRl.check(clientIp(req))) throw new HttpError(429, 'Too many requests');
       const body = await readJson(req);
       const { ciphertext } = body ?? {};
-      const ttlSeconds = body?.ttlSeconds ?? 3600;
+      const ttlSeconds = body?.ttlSeconds ?? maxTtlSeconds;
       const maxReads = body?.maxReads ?? 1;
       if (typeof ciphertext !== 'string' || !CIPHERTEXT_RE.test(ciphertext)) {
         throw new HttpError(400, 'ciphertext must be base64url (iv || ciphertext || tag)');

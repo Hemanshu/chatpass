@@ -36,3 +36,10 @@ export async function decrypt(payloadB64, keyB64) {
   const pt = await subtle.decrypt({ name: 'AES-GCM', iv: buf.subarray(0, 12) }, key, buf.subarray(12));
   return new TextDecoder().decode(pt);
 }
+
+/** Like decrypt, but returns raw bytes (for writing secrets to disk unchanged). */
+export async function decryptBytes(payloadB64, keyB64) {
+  const key = await subtle.importKey('raw', fromBase64Url(keyB64), 'AES-GCM', false, ['decrypt']);
+  const buf = fromBase64Url(payloadB64);
+  return new Uint8Array(await subtle.decrypt({ name: 'AES-GCM', iv: buf.subarray(0, 12) }, key, buf.subarray(12)));
+}

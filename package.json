@@ -1,14 +1,24 @@
 {
   "name": "chatpass",
-  "version": "0.1.0",
-  "description": "Share secrets with LLM agents via one-time, end-to-end encrypted links.",
+  "version": "0.2.0",
+  "description": "Share secrets with AI agents via one-time, end-to-end encrypted links. Web UI, CLI and MCP server.",
   "type": "module",
-  "private": true,
-  "main": "server.js",
+  "main": "src/client.js",
+  "exports": {
+    ".": "./src/client.js",
+    "./mcp": "./src/mcp.js",
+    "./server": "./src/server.js"
+  },
+  "bin": { "chatpass": "bin/chatpass.js" },
+  "files": ["bin/", "src/", "public/", "server.js", "README.md", "LICENSE"],
   "engines": { "node": ">=20" },
   "scripts": {
     "start": "node server.js",
     "test": "node --test test/*.test.js"
   },
+  "keywords": ["secrets", "one-time-secret", "e2e", "encryption", "llm", "ai-agent", "mcp", "yopass"],
+  "repository": { "type": "git", "url": "git+https://github.com/Hemanshu/chatpass.git" },
+  "homepage": "https://github.com/Hemanshu/chatpass#readme",
+  "bugs": "https://github.com/Hemanshu/chatpass/issues",
   "license": "MIT"
 }

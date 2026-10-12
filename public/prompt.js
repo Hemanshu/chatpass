@@ -19,6 +19,17 @@ const PY_DECRYPT =
   'b=f(sys.stdin.read().strip());' +
   'sys.stdout.buffer.write(AESGCM(f(os.environ["CHATPASS_KEY"])).decrypt(b[:12],b[12:],None))';
 
+/** One-string form of a share: the reveal URL with the key in the fragment. */
+export function buildShareLink({ revealUrl, key }) {
+  return `${revealUrl}#${key}`;
+}
+
+export function parseShareLink(link) {
+  const m = /^(https?:\/\/[^#\s]+\/api\/secrets\/([A-Za-z0-9_-]{22})\/reveal)#([A-Za-z0-9_-]{43})$/.exec(String(link).trim());
+  if (!m) throw new Error('Invalid ChatPass link (expected https://host/api/secrets/<id>/reveal#<key>)');
+  return { revealUrl: m[1], id: m[2], key: m[3] };
+}
+
 /** The self-contained retrieval script. Writes the secret to ~/.chatpass/<NAME> (mode 600). */
 export function buildScript({ revealUrl, key, name }) {
   if (!NAME_RE.test(name)) throw new Error('Invalid secret name');
@@ -39,6 +50,7 @@ export function buildScript({ revealUrl, key, name }) {
 
 export function buildPrompt({ revealUrl, key, name, expiresAt, maxReads = 1, instructions = '' }) {
   const script = buildScript({ revealUrl, key, name });
+  const link = buildShareLink({ revealUrl, key });
   const expires = new Date(expiresAt).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
   const reads = maxReads === 1 ? 'can be retrieved exactly once' : `can be retrieved ${maxReads} times`;
   const task = instructions.trim()
@@ -47,18 +59,23 @@ export function buildPrompt({ revealUrl, key, name, expiresAt, maxReads = 1, ins
 
   return `I'm sharing a secret named \`${name}\` with you via ChatPass, an end-to-end encrypted, self-destructing link. It expires at ${expires} and ${reads}.
 
-Retrieve it by running this exact command in your shell/sandbox environment. Do NOT open the URL in a browser or web-fetch tool: retrieval requires a POST, and a failed attempt may burn the secret.
+Retrieve it with ONE of the methods below (the link works only once, so do not try several):
+
+1. If you have the ChatPass MCP tool \`retrieve_secret\`, call it with \`link\` = \`${link}\` and \`name\` = \`${name}\`.
+2. Otherwise run this exact command in your shell/sandbox environment:
 
 \`\`\`bash
 ${script}
 \`\`\`
 
-The secret is now in \`~/.chatpass/${name}\` (permissions 600). Use it by reading the file only where it is needed, e.g. \`${name}="$(cat ~/.chatpass/${name})" some-command\` or \`export ${name}="$(cat ~/.chatpass/${name})"\` inside the same command.
+Do NOT open the URL in a browser or web-fetch tool: retrieval requires a POST, and a failed attempt may burn the secret.
+
+Either way, the secret ends up in \`~/.chatpass/${name}\` (permissions 600). Use it by reading the file only where it is needed, e.g. \`${name}="$(cat ~/.chatpass/${name})" some-command\` or \`export ${name}="$(cat ~/.chatpass/${name})"\` inside the same command.
 ${task}
 Rules for handling this secret:
 - Never print, echo, cat to output, log, or repeat the secret value in this chat, in tool output, or in commit messages.
 - Never commit it to version control or write it into files that are tracked by git. If it must go into a config file, make sure the file is git-ignored.
 - Do not send it anywhere other than the service it is meant for.
-- If the command fails with HTTP 404, the secret has expired, was already retrieved, or was revoked. Tell me and do not retry. If it fails for any other reason (e.g. network blocked), tell me the error.
+- If retrieval fails with HTTP 404, the secret has expired, was already retrieved, or was revoked. Tell me and do not retry. If it fails for any other reason (e.g. network blocked), tell me the error.
 - When the task is done, delete it with \`rm -f ~/.chatpass/${name}\` unless I ask you to keep it.`;
 }
