@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>ChatPass</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>ChatPass</h1>
+      <p class="lede">Hand a secret to an AI agent without pasting it into the chat. It's encrypted in your browser; the server only holds ciphertext, briefly, and deletes it on first retrieval.</p>
+    </header>
+
+    <form id="create" autocomplete="off">
+      <label for="name">Name <span class="hint">used as the file / env var name</span></label>
+      <input id="name" name="name" required pattern="[A-Za-z_][A-Za-z0-9_]{0,63}" placeholder="OPENAI_API_KEY" spellcheck="false">
+
+      <label for="secret">Secret</label>
+      <textarea id="secret" name="secret" required rows="4" spellcheck="false" placeholder="sk-..."></textarea>
+
+      <label for="instructions">Instructions for the assistant <span class="hint">optional, not encrypted, part of the prompt</span></label>
+      <textarea id="instructions" name="instructions" rows="2" placeholder="Add it to .env (git-ignored) and run the integration tests."></textarea>
+
+      <div class="row">
+        <div>
+          <label for="ttl">Expires after</label>
+          <select id="ttl" name="ttl">
+            <option value="300">5 minutes</option>
+            <option value="900" selected>15 minutes</option>
+            <option value="3600">1 hour</option>
+            <option value="86400">24 hours</option>
+          </select>
+        </div>
+        <div>
+          <label for="reads">Retrievals allowed</label>
+          <select id="reads" name="reads">
+            <option value="1" selected>1 (recommended)</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" id="submit">Encrypt &amp; create prompt</button>
+      <p id="error" class="error" role="alert" hidden></p>
+    </form>
+
+    <section id="result" hidden>
+      <div class="result-head">
+        <h2>Paste this into your AI chat</h2>
+        <span id="status" class="status">Waiting for retrieval…</span>
+      </div>
+      <textarea id="prompt" readonly rows="16" spellcheck="false"></textarea>
+      <div class="actions">
+        <button type="button" id="copy">Copy prompt</button>
+        <button type="button" id="revoke" class="secondary">Revoke now</button>
+        <button type="button" id="again" class="secondary">Share another</button>
+      </div>
+      <p class="hint">The prompt contains the decryption key, so treat it like the secret until it has been retrieved. Once it's retrieved or expired, the prompt is useless.</p>
+    </section>
+
+    <details>
+      <summary>How it works</summary>
+      <ol>
+        <li>Your browser generates a random 256-bit AES-GCM key and encrypts the secret locally.</li>
+        <li>Only the ciphertext is uploaded. The server keeps it in memory (never on disk) until it expires or is retrieved.</li>
+        <li>The prompt gives the agent a one-line script that POSTs to the reveal URL, decrypts locally with the key, and saves the result to <code>~/.chatpass/NAME</code> with mode 600.</li>
+        <li>The server deletes the ciphertext on retrieval. The key never touches the server, and the ciphertext never appears in the chat.</li>
+      </ol>
+    </details>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "chatpass",
+  "version": "0.1.0",
+  "description": "Share secrets with LLM agents via one-time, end-to-end encrypted links.",
+  "type": "module",
+  "private": true,
+  "main": "server.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "license": "MIT"
+}
