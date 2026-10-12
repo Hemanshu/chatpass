@@ -88,6 +88,24 @@ Tools (none of them return secret values):
 
 Set `CHATPASS_DIR` to change the storage directory.
 
+## Claude Code plugin (skill + subagent + MCP)
+
+This repo is also a Claude Code plugin marketplace:
+
+```
+/plugin install chatpass --marketplace Hemanshu/chatpass
+```
+
+On older Claude Code versions, run `/plugin marketplace add Hemanshu/chatpass` first, then `/plugin install chatpass@chatpass`. Self-hosting? Point `marketplace add` at your own git URL or a local path.
+
+| Component | Path | Purpose |
+| --- | --- | --- |
+| Skill `chatpass` | `skills/chatpass/SKILL.md` | Teaches the agent to retrieve once, use secrets without echoing them, handle errors, and clean up. |
+| Subagent `chatpass-secrets` | `agents/chatpass-secrets.md` | Handles retrieval and wiring in its own context, then reports back only the path and size. |
+| MCP server `chatpass` | `.claude-plugin/plugin.json` | Runs `bin/chatpass.js mcp` from the plugin, so no npm install is needed. |
+
+To use the skill or agent without the plugin, copy them into `.claude/skills/chatpass/` and `.claude/agents/` (project) or `~/.claude/...` (user).
+
 ## Run / deploy
 
 ```bash

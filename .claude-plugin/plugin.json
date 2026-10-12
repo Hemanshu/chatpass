@@ -1,0 +1,16 @@
+{
+  "name": "chatpass",
+  "version": "0.2.0",
+  "description": "Receive secrets from users via one-time, end-to-end encrypted ChatPass links: skill, subagent and MCP server.",
+  "author": { "name": "Hemanshu" },
+  "homepage": "https://github.com/Hemanshu/chatpass",
+  "repository": "https://github.com/Hemanshu/chatpass",
+  "license": "MIT",
+  "keywords": ["secrets", "encryption", "one-time-secret", "mcp"],
+  "mcpServers": {
+    "chatpass": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bin/chatpass.js", "mcp"]
+    }
+  }
+}

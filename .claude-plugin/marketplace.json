@@ -1,0 +1,15 @@
+{
+  "name": "chatpass",
+  "description": "ChatPass: hand secrets to AI agents via one-time, end-to-end encrypted links.",
+  "owner": {
+    "name": "Hemanshu"
+  },
+  "plugins": [
+    {
+      "name": "chatpass",
+      "source": "./",
+      "description": "Receive secrets via one-time, end-to-end encrypted ChatPass links (skill + subagent + MCP server).",
+      "version": "0.2.0"
+    }
+  ]
+}
